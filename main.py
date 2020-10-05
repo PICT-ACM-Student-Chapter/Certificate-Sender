@@ -1,7 +1,9 @@
-from __future__ import print_function
+# from __future__ import print_function
 
+import base64
 import os.path
 import pickle
+from email.mime.text import MIMEText
 
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -12,8 +14,8 @@ SCOPES = ['https://mail.google.com/']
 
 
 def main():
-    """Shows basic usage of the Gmail API.
-    Lists the user's Gmail labels.
+    """
+    Validates credentials and initialise the service
     """
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
@@ -34,19 +36,55 @@ def main():
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
 
-    service = build('gmail', 'v1', credentials=creds)
+    return build('gmail', 'v1', credentials=creds)
 
-    # Call the Gmail API
-    results = service.users().labels().list(userId='me').execute()
-    labels = results.get('labels', [])
 
-    if not labels:
-        print('No labels found.')
-    else:
-        print('Labels:')
-        for label in labels:
-            print(label['name'])
+def create_message(sender, to, subject, message_text):
+    """Create a message for an email.
+
+    Args:
+      sender: Email address of the sender.
+      to: Email address of the receiver.
+      subject: The subject of the email message.
+      message_text: The text of the email message.
+
+    Returns:
+      An object containing a base64url encoded email object.
+    """
+    message = MIMEText(message_text)
+    message['to'] = to
+    message['from'] = sender
+    message['subject'] = subject
+    return {'raw': base64.urlsafe_b64encode(message.as_string().encode()).decode()}
+
+
+def send_message(service, user_id, message):
+    """Send an email message.
+
+    Args:
+      service: Authorized Gmail API service instance.
+      user_id: User's email address. The special value "me"
+      can be used to indicate the authenticated user.
+      message: Message to be sent.
+
+    Returns:
+      Sent Message.
+    """
+    try:
+        message = (service.users().messages().send(userId=user_id, body=message)
+                   .execute())
+        print('Message Id: ' + str(message['id']))
+        return message
+    except Exception as err:
+        print('An error occurred: ' + str(err))
 
 
 if __name__ == '__main__':
-    main()
+    service_obj = main()
+    message_obj = create_message(
+        'acm.pict@gmail.com',
+        'daigavanep@gmail.com',
+        'Test Mail',
+        'This is a test mail'
+    )
+    send_message(service_obj, 'me', message_obj)

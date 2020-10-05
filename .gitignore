@@ -130,3 +130,4 @@ dmypy.json
 data.csv
 credentials.json
 template.jpg
+token.pickle
