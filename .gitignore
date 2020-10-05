@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+data.csv
+credentials.json
+template.jpg
+token.pickle
