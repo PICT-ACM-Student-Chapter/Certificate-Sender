@@ -1,10 +1,13 @@
 # Certificate-Sender
 script to send certificates in bulk through email
 
-### Install dependencies from requirements file.
+#### Install dependencies.
 
 `pip install -r requirements.txt`
 
-### Test:
+#### Config
+modify `config.py` as needed
+
+#### Run:
 `python main.py`
 
